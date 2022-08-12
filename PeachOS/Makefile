@@ -25,10 +25,10 @@ all: ./bin/boot.bin ./bin/kernel.bin
 	nasm -f elf -g ./src/idt/idt.asm -o ./build/idt/idt.asm.o
 
 ./build/idt/idt.o: ./src/idt/idt.c
-	i686-elf-gcc $(INCLUDES) -I./src/idt  $(FLAGS) -std=gnu99 -c ./src/idt/idt.c -o ./build/idt/idt.o
+	i686-elf-gcc $(INCLUDES) -I./src/idt $(FLAGS) -std=gnu99 -c ./src/idt/idt.c -o ./build/idt/idt.o
 
 ./build/memory/memory.o: ./src/memory/memory.c
-	i686-elf-gcc $(INCLUDES) -I./src/memory  $(FLAGS) -std=gnu99 -c ./src/memory/memory.c -o ./build/memory/memory.o
+	i686-elf-gcc $(INCLUDES) -I./src/memory $(FLAGS) -std=gnu99 -c ./src/memory/memory.c -o ./build/memory/memory.o
 
 clean:
 	rm -rf ./bin/boot.bin

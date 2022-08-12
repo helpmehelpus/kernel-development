@@ -7,5 +7,5 @@ idt_load:
 
     mov ebx, [ebp+8]
     lidt [ebx]
-    pob ebp
+    pop ebp
     ret
