@@ -1,0 +1,78 @@
+Boot process
+Bios from ROM. Bios looks for a bootloader to boot by searching all storage mediums for the boot signature 0x55AA
+Bios loads bootloader into 0x7C00
+Bootloader loads the kernel
+
+Resources:
+    wiki.osdev.org
+    ralf brown's interrupt list
+
+#### Real mode: 16-bit state
+1MB of RAM accessible
+Based on the original x86 design
+No security for memory or hardware
+Memory is access through segmentation (segments and offsets)
+
+#### Segmentation memory model
+Access by segment and offset
+Programs can be loaded in different areas of memory, but run without problems
+Multiple segments are available through the use of segment registers:
+    CS - Code segment
+    SS - Stack segment
+    DS - Data segment
+    ES - Extra segment
+
+Absolute offset:
+    Take the segment register times 16 and add offset
+    Segment = 0x7c0
+    Assembly origin "org" is zero
+    (0x7c0 * 16) = 0x7c00
+    0x7c00 + 0 = 0x7c00
+
+    0x7cf * 16 = 0x7cf0
+    0x7cf0 + 0x0f = 0x7cff
+
+    Different assemply instructions use differnt segment registers
+    lodsb: uses DS:SI
+
+#### Interrupt vector table
+Interrupts are called through the use of numbers, rather than memory addresses (special subroutines)
+Processor is interrupted -> Old state is saved on the stack -> interrupt is executed
+256 interrupt handler. offset:segment -> absolute address, 4 by 4 bytes
+We use interrupt descriptor table for 32 bit
+
+#### Disk access
+Files do not actually exist. They are a kernel concept
+Implementing a filesystem requires the programmer to create a filesystem driver for the target system
+Data is read and written in sectors, typically 512 byte blocks
+CSH is the old way
+LBA (Logical Blcok Address) is more modern (allows us to read from the disk as if we are reading blocks from a very large file)
+LBA 0 = first sector, LBA 1 = second sector
+
+Access byte at 58376:
+    58376 / 512 = 114
+    offset - 58376 % 512 = 8
+
+In 16 bit real mode, BIOS provides interrupt 13h for disk operation
+In 32 bit, you have to create your own disk driver
+
+#### Protected mode
+4GB address space
+Kernel is ring 0 - you can do anything with this ring
+Applications are ring 3
+Segment registers become selector registers -> selectors point to data structures that describe memory ranges and permissions
+Paging is doable here:
+    memory is virtual and what you address can point to somewhere different in memory
+    memory protection is easier to control
+    paging is the most popular chois for memory schemed with kernels/operating systems
+32-bit instructions and registers
+
+
+### Kernel dev
+in gdb, to load the full kernel: add-symbol-file ../build/kernelfull.o 0x100000
+debug kernel: target remote | qemu-system-x86_64 -S -gdb stdio -hda ./os.bin (in gdb)
+
+# TEXT MODE
+allows you write ascii to video memory
+starting address 0xB8000 for coloured displays, 0xB0000 for monochrome
+each character takes up 2 bytes
